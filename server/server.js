@@ -1,5 +1,6 @@
-let express = require('express');
-let bodyParser = require('body-parser');
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 
 
@@ -58,12 +59,36 @@ app.delete('/todos/:id',(req,res)=>{
     }
     return res.status(200).send({todo});
   }).catch((e) => res.status(400).send());
-  //remove todo by id
-    //success
-      //if no doc, send 404
-      //if doc, send doc
-    //error
-      //400
+
+});
+
+app.patch('/todos/:id', (req,res) =>{
+
+  let id = req.params.id;
+  if (!ObjectID.isValid(id)) {
+    console.log("The ID was not valid");
+    return res.status(404).send();
+  } 
+  //pick only lets user modify certain fields
+  let body = _.pick(req.body, ['text', 'completed']);
+
+  if(_.isBoolean(body.completed)&& body.completed){
+    body.completedAt = new Date().getTime();
+  } else {
+    body.completed = false;
+    body.completedAt = null;
+  }
+
+  Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
+    if (!todo){
+      console.log("The object was not valid");
+      return res.status(404).send();
+    }
+    res.send({todo});
+  }).catch((e) =>{
+    res.status(400).send();
+  })
+  
 
 });
 
