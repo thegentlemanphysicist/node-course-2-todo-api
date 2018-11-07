@@ -65,7 +65,6 @@ app.delete('/todos/:id',(req,res)=>{
 });
 
 app.patch('/todos/:id', (req,res) =>{
-
   let id = req.params.id;
   if (!ObjectID.isValid(id)) {
     console.log("The ID was not valid");
@@ -73,14 +72,12 @@ app.patch('/todos/:id', (req,res) =>{
   } 
   //pick only lets user modify certain fields
   let body = _.pick(req.body, ['text', 'completed']);
-
   if(_.isBoolean(body.completed)&& body.completed){
     body.completedAt = new Date().getTime();
   } else {
     body.completed = false;
     body.completedAt = null;
   }
-
   Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
     if (!todo){
       console.log("The object was not valid");
@@ -90,8 +87,30 @@ app.patch('/todos/:id', (req,res) =>{
   }).catch((e) =>{
     res.status(400).send();
   })
-  
+});
 
+app.post('/users', (req,res) => {
+  let body = _.pick(req.body,['email','password']);
+  let user = new User(body);
+     
+  //{
+  //   email: body.email,
+  //   password: body.password,
+  //   tokens: [
+  //     {access: 'test access string'},
+  //     {token: 'test token string'}
+  //   ]
+  // });
+  user.save().then((user) => {
+    return user.generateAuthToken();
+    //res.send(user);
+  })
+  .then((token) =>{
+    res.header('x-auth', token).send(user);
+  })
+  .catch( (e) =>{
+    res.status(400).send(e);
+  })
 });
 
 app.listen(port, () =>{
