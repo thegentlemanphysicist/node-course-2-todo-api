@@ -5,7 +5,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 
-
+var {authenticate} = require('./middleware/authenticate')
 var {mongoose} = require('./db/mongoose');
 let {Todo} = require('./models/todo');
 let {User} = require('./models/user');
@@ -101,7 +101,7 @@ app.post('/users', (req,res) => {
   //     {token: 'test token string'}
   //   ]
   // });
-  user.save().then((user) => {
+  user.save().then(() => {
     return user.generateAuthToken();
     //res.send(user);
   })
@@ -111,6 +111,12 @@ app.post('/users', (req,res) => {
   .catch( (e) =>{
     res.status(400).send(e);
   })
+});
+
+
+
+app.get('/users/me', authenticate, (req,res) => {
+  res.send(req.user);
 });
 
 app.listen(port, () =>{
