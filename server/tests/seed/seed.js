@@ -22,12 +22,14 @@ const users = [{
 
 const todos = [{
   _id: new ObjectID(),
-  text: 'Dirst test todo'
+  text: 'Dirst test todo',
+  _creator: userOneID
 }, {
   _id: new ObjectID(),
   text: 'Second test todo',
   completed: true,
-  completedAt: 333
+  completedAt: 333,
+  _creator: userTwoID
 }];
 
 const populateTodos = (done)=>{
